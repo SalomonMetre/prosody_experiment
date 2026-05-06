@@ -54,10 +54,10 @@ class TrialResult(BaseModel):
 @app.post("/get-session")
 async def get_session(p: Participant):
     # Validation based on your research criteria
-    if p.hearing.lower() in ["impaired", "difficulties"]:
-        raise HTTPException(status_code=400, detail="Hearing criteria not met")
-    if p.exposure.lower() in ["high", "low"]: # Zero exposure only
-        raise HTTPException(status_code=400, detail="Exposure too high for naïve group")
+    # if p.hearing.lower() in ["impaired", "difficulties"]:
+    #     raise HTTPException(status_code=400, detail="Hearing criteria not met")
+    # if p.exposure.lower() in ["high", "low"]: # Zero exposure only
+    #     raise HTTPException(status_code=400, detail="Exposure too high for naïve group")
 
     flip_val = random.choice([0, 1])
     
