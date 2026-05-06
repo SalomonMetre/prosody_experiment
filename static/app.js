@@ -115,45 +115,49 @@ window.start = async function () {
 /* ---------------------------
    TRIAL LOOP
 ---------------------------- */
+/* ---------------------------
+   TRIAL LOOP (FIXED UI LOCK)
+---------------------------- */
 async function run() {
-
     const trials = stage === "test" ? testTrials : mainTrials;
 
+    // End of stage check
     if (i >= trials.length) {
-
         if (stage === "test") {
             stage = "main";
             i = 0;
+            // Optional: Add an "End of Practice" message/button here
             run();
             return;
         }
-
         alert("Experiment complete");
+        show("view-end"); // Ensure you have a final view
         return;
     }
 
     canRespond = false;
-
     const responseBox = document.getElementById("response");
     const instruction = document.getElementById("instruction");
+    const fixArea = document.getElementById("fix");
 
+    // 1. PHYSICAL UI LOCK: Hide buttons and empty instructions
     responseBox.classList.add("hidden");
+    instruction.innerHTML = ""; 
 
-    document.getElementById("fix").innerText =
-        stage === "test" ? `Practice ${i + 1}` : `Test ${i + 1}`;
+    // 2. TRIAL ORIENTATION: Display Trial Number (No fixation cross)
+    fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Test ${i + 1}`;
+    await new Promise(r => setTimeout(r, 800));
+    
+    // Clear number before audio begins
+    fixArea.innerText = ""; 
+    await new Promise(r => setTimeout(r, 500));
 
-    await new Promise(r => setTimeout(r, 700));
-
+    // 3. AUDIO PLAYBACK (Sequentially)
     await play(trials[i].s1);
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 300 + Math.random() * 200)); // 300-500ms Jittered ISI
     await play(trials[i].s2);
 
-    /* START RT CLOCK HERE */
-    trialStartTime = performance.now();
-
-    document.getElementById("b1").innerText = "SAME";
-    document.getElementById("b2").innerText = "DIFFERENT";
-
+    // 4. RESPONSE WINDOW: Populate instructions and show buttons
     instruction.innerHTML = `
         <div style="
             font-size: 15px;
@@ -172,8 +176,12 @@ async function run() {
         </div>
     `;
 
-    responseBox.classList.remove("hidden");
+    document.getElementById("b1").innerText = "SAME";
+    document.getElementById("b2").innerText = "DIFFERENT";
 
+    // Show the container and start the RT clock
+    responseBox.classList.remove("hidden");
+    trialStartTime = performance.now();
     canRespond = true;
 }
 
