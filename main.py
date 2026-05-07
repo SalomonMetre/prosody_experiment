@@ -9,6 +9,9 @@ app = FastAPI()
 # Ensure this matches your intended filename
 DB_PATH = "prosody_study.db"
 
+# -----------------------
+# DB INIT
+# -----------------------
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -35,6 +38,9 @@ def init_db():
 
 init_db()
 
+# -----------------------
+# MODELS
+# -----------------------
 class Participant(BaseModel):
     lang: str
     otherlang: str | None = "None"
@@ -51,14 +57,12 @@ class TrialResult(BaseModel):
     is_correct: bool
     rt_ms: int
 
+# -----------------------
+# SESSION (Validation Removed)
+# -----------------------
 @app.post("/get-session")
 async def get_session(p: Participant):
-    # Validation based on your research criteria
-    # if p.hearing.lower() in ["impaired", "difficulties"]:
-    #     raise HTTPException(status_code=400, detail="Hearing criteria not met")
-    # if p.exposure.lower() in ["high", "low"]: # Zero exposure only
-    #     raise HTTPException(status_code=400, detail="Exposure too high for naïve group")
-
+    
     flip_val = random.choice([0, 1])
     
     conn = sqlite3.connect(DB_PATH)
@@ -73,6 +77,9 @@ async def get_session(p: Participant):
     finally:
         conn.close()
 
+    # -----------------------
+    # TRIAL GENERATION
+    # -----------------------
     trials = []
     recordings_root = "recordings"
     
@@ -84,19 +91,28 @@ async def get_session(p: Participant):
     for folder in folders:
         pair_path = os.path.join(recordings_root, folder)
         files = sorted([f for f in os.listdir(pair_path) if f.endswith(".wav")])
-        if len(files) < 2: continue
+        if len(files) < 2: 
+            continue
 
         a = f"/recordings/{folder}/{files[0]}"
         b = f"/recordings/{folder}/{files[1]}"
 
-        # 3 permutations per pair
+        # 3 permutations per pair: AA, BB, and AB
         trials.append({"id": int(folder), "perm": "AA", "s1": a, "s2": a, "ans": "SAME"})
         trials.append({"id": int(folder), "perm": "BB", "s1": b, "s2": b, "ans": "SAME"})
         trials.append({"id": int(folder), "perm": "AB", "s1": a, "s2": b, "ans": "DIFFERENT"})
 
     random.shuffle(trials)
-    return {"p_id": p_id, "trials": trials, "flip": bool(flip_val)}
+    
+    return {
+        "p_id": p_id, 
+        "trials": trials, 
+        "flip": bool(flip_val)
+    }
 
+# -----------------------
+# RESULTS
+# -----------------------
 @app.post("/submit")
 async def submit(res: TrialResult):
     conn = sqlite3.connect(DB_PATH)
@@ -107,5 +123,8 @@ async def submit(res: TrialResult):
     conn.close()
     return {"status": "recorded"}
 
+# -----------------------
+# STATIC MOUNTS
+# -----------------------
 app.mount("/recordings", StaticFiles(directory="recordings"), name="recordings")
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
