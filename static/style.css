@@ -1,35 +1,42 @@
-/* Response Container */
-#instruction {
-    min-height: 120px; /* Prevents layout jumping */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+:root {
+  --c1: #00d1b2; /* Main Action Color (Teal) */
+  --c2: #ffdd57; /* The "OR" Separator (Gold) */
+  --c1-shade: #00a892; /* The Keyboard Hint (Darker Teal) */
 }
 
-/* The Animated Card */
-.response-card {
-    background: #1e1e1e;
-    border: 1px solid #333;
-    padding: 24px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    animation: reveal 0.4s ease-out forwards;
+.instruction-card {
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  border: 1px solid #333;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: reveal 0.4s ease-out;
 }
 
-.response-card p {
-    margin-bottom: 1rem;
-    color: #ccc;
+.text-c1 {
+  color: var(--c1);
+  font-weight: bold;
+  font-size: 1.2rem;
 }
-
-.response-card b {
-    color: #00d1b2; /* Professional accent color */
-    font-size: 1.1rem;
+.text-c2 {
+  color: var(--c2);
+  font-weight: 300;
+  margin: 10px 0;
+  display: block;
+}
+.text-c1-shade {
+  color: var(--c1-shade);
+  font-size: 0.95rem;
 }
 
 @keyframes reveal {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-
-.hidden { display: none !important; }

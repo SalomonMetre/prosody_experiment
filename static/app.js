@@ -37,34 +37,6 @@ function show(id) {
   if (target) target.classList.remove("hidden");
 }
 
-window.goForm = () => show("form");
-window.goHP = () => show("hp");
-
-/* ---------------------------
-   TEST SOUND
----------------------------- */
-window.testSound = async function () {
-  await unlockAudio();
-  const hp = document.getElementById("hpplay");
-  hp.classList.remove("hidden");
-
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-
-  o.type = "sine";
-  o.frequency.value = 440;
-  g.gain.value = 0.08;
-
-  o.connect(g);
-  g.connect(ctx.destination);
-  o.start();
-
-  setTimeout(() => {
-    o.stop();
-    hp.classList.add("hidden");
-  }, 1000);
-};
-
 /* ---------------------------
    START EXPERIMENT
 ---------------------------- */
@@ -93,8 +65,9 @@ window.start = async function () {
     pid = data.p_id;
     allTrials = data.trials;
 
-    // Corrected logic: 2 random trials for warm-up, but keep the full 93 for main
+    // Warm-up: 2 random trials from the pool
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
+    // Main experiment: Full 93 trials
     mainTrials = allTrials;
 
     stage = "test";
@@ -103,7 +76,7 @@ window.start = async function () {
     show("task");
     run();
   } catch (e) {
-    alert("System Error: Failed to initialize session.");
+    alert("Initialization failed. Please check server connection.");
     console.error(e);
   }
 };
@@ -118,7 +91,7 @@ async function run() {
     if (stage === "test") {
       stage = "main";
       i = 0;
-      alert("End of practice. The real experiment starts now.");
+      alert("Practice complete. The actual experiment starts now.");
       run();
       return;
     }
@@ -131,27 +104,28 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
-  // 1. UI RESET
+  // Reset UI
   responseBox.classList.add("hidden");
-  instruction.innerHTML = ""; // Clear old card
+  instruction.innerHTML = "";
 
-  // 2. ORIENTATION
+  // Orientation
   fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // 3. PLAYBACK
+  // Playback
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 300 + Math.random() * 200));
   await play(trials[i].s2);
 
-  // 4. RESPONSE WINDOW (Clean DOM Manipulation)
+  // Response UI Creation
   const card = document.createElement("div");
-  card.className = "response-card";
+  card.className = "instruction-card";
   card.innerHTML = `
-      <p>Were the prosodies of the two sounds same or different?</p>
-      <b>[S] SAME</b> &nbsp; or &nbsp; <b>[K] DIFFERENT</b>
+    <div class="text-c1">Click SAME or DIFFERENT</div>
+    <div class="text-c2">OR</div>
+    <div class="text-c1-shade">Press S (SAME) or K (DIFFERENT)</div>
   `;
   instruction.appendChild(card);
 
@@ -210,7 +184,7 @@ window.choose = async function (k) {
 
   document.getElementById("response").classList.add("hidden");
   i++;
-  setTimeout(run, 500); // Slight buffer for visual comfort
+  setTimeout(run, 500);
 };
 
 /* ---------------------------
