@@ -169,7 +169,7 @@ async function run() {
             border-radius: 8px;
             margin-top: 10px;
         ">
-            <b> Click the button <b> SAME </b> (or press the key <b>S</b>) <b> <br> <br> OR </b> <br> <br> Click the button <b> DIFFERENT </b> for <b>SAME</b> (or press the key <b>DIFFERENT</b>)
+            <b> Click <b> SAME </b> (or press the key <b>S</b>) <b> <br> <br> OR </b> <br> <br> Click <b> DIFFERENT </b> (or press the key <b>K</b>)
         </div>
     `;
 
