@@ -1,60 +1,30 @@
-:root {
-    --teal-main: #00cbcb;
-    --gold-or: #ffdd57;
-    --bg-card: #1a1a1a;
-}
-
-.instruction-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-start;
-    gap: 2rem;
-    padding: 20px;
-}
-
-.instr-group {
+.input-hint {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #888;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 5px;
 }
 
-.group-title {
-    color: #888;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Flat Button Symbol */
-.flat-btn-sym {
-    background: transparent;
-    border: 2px solid var(--teal-main);
+/* Mechanical Keyboard Key Style */
+.kbd-key {
+    background: #2a2a2a;
     color: var(--teal-main);
-    padding: 8px 20px;
-    border-radius: 6px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
-    font-size: 1rem;
-}
-
-.instr-or {
-    color: var(--gold-or);
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-/* Volume Keyboard Key Symbol */
-.vol-key-sym {
-    background: #333;
-    color: #eee;
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-family: monospace;
-    font-weight: bold;
-    font-size: 1.2rem;
-    /* The "Volume" effect */
-    border-bottom: 4px solid #000;
-    border-right: 2px solid #111;
+    border: 1px solid #444;
+    border-bottom: 3px solid #000; /* The "Volume" depth */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     display: inline-block;
-    min-width: 40px;
+}
+
+.or-text {
+    font-size: 0.75rem;
+    color: var(--gold-or);
+    font-weight: bold;
+    text-transform: uppercase;
 }

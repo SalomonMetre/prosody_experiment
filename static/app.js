@@ -27,7 +27,7 @@ async function unlockAudio() {
 }
 
 /* ---------------------------
-   MODAL LOGIC
+   MODAL LOGIC (Professional Overlay)
 ---------------------------- */
 let modalResolve;
 
@@ -121,6 +121,7 @@ window.start = async function () {
     pid = data.p_id;
     allTrials = data.trials;
 
+    // Warm-up logic: 2 random trials, full pool for main experiment
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
     mainTrials = allTrials;
 
@@ -132,7 +133,7 @@ window.start = async function () {
   } catch (e) {
     await customAlert(
       "Connection Error",
-      "Database check failed. Please ensure the backend is active.",
+      "The database is unreachable. Please restart the service on the server.",
     );
     console.error(e);
   }
@@ -150,12 +151,12 @@ async function run() {
       i = 0;
       await customAlert(
         "Practice Complete",
-        "Warm-up finished. The real experiment starts now.",
+        "You have finished the warm-up. The actual experiment begins now.",
       );
       run();
       return;
     }
-    await customAlert("Finished", "The experiment is complete. Thank you!");
+    await customAlert("Finished", "The experiment is now complete. Thank you!");
     show("view-end");
     return;
   }
@@ -165,48 +166,42 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
+  // Reset UI per trial
   responseBox.classList.add("hidden");
   instruction.innerHTML = "";
 
-  // 1. Orientation
+  // 1. Orientation Phase
   fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // 2. Audio
+  // 2. Audio Phase
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 400));
   await play(trials[i].s2);
 
-  // 3. Response Phase - Split Visual Mapping
-  const container = document.createElement("div");
-  container.className = "instruction-container";
+  // 3. Response Phase (Grouped Buttons + Key Hints)
+  instruction.innerHTML = `<div style="color:#888; font-size:0.95rem; margin-bottom:15px;">Please respond:</div>`;
 
-  function createGroup(sideTitle, btnText, keyChar) {
-    return `
-        <div class="instr-group">
-            <div class="group-title">${sideTitle}</div>
-            <div class="action-row">
-                <span class="label-small">Click</span>
-                <div class="flat-btn-sym">${btnText}</div>
-            </div>
-            <div class="instr-or">OR</div>
-            <div class="action-row">
-                <span class="label-small">Press</span>
-                <div class="vol-key-sym">${keyChar}</div>
-            </div>
-        </div>
-    `;
-  }
+  // Helper to inject keyboard hints under the buttons
+  const setupInputGroup = (btnId, keyChar) => {
+    const btn = document.getElementById(btnId);
+    const container = btn.parentElement;
 
-  container.innerHTML =
-    createGroup("SAME", "SAME", "S") +
-    createGroup("DIFFERENT", "DIFFERENT", "K");
+    // Remove old hints to prevent stacking
+    const oldHint = container.querySelector(".input-hint");
+    if (oldHint) oldHint.remove();
 
-  instruction.appendChild(container);
+    const hint = document.createElement("div");
+    hint.className = "input-hint";
+    hint.innerHTML = `<span class="or-text">OR</span> <span>press <span class="kbd-key">${keyChar}</span></span>`;
+    container.appendChild(hint);
+  };
 
-  // Buttons are populated but hidden until this point
+  setupInputGroup("b1", "S");
+  setupInputGroup("b2", "K");
+
   document.getElementById("b1").innerText = "SAME";
   document.getElementById("b2").innerText = "DIFFERENT";
 
