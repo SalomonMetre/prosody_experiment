@@ -5,7 +5,6 @@ let mainTrials = [];
 
 let i = 0;
 let stage = "test";
-
 let canRespond = false;
 let pid;
 let trialStartTime = 0;
@@ -22,16 +21,15 @@ function audio() {
 
 async function unlockAudio() {
   const a = audio();
-  if (a.state === "suspended") {
-    await a.resume();
-  }
+  if (a.state === "suspended") await a.resume();
 }
 
 /* ---------------------------
    VIEW SWITCH
 ---------------------------- */
 function show(id) {
-  ["instr", "form", "hp", "task", "view-end"].forEach((x) => {
+  const views = ["instr", "form", "hp", "task", "view-end"];
+  views.forEach((x) => {
     const el = document.getElementById(x);
     if (el) el.classList.add("hidden");
   });
@@ -95,10 +93,8 @@ window.start = async function () {
     pid = data.p_id;
     allTrials = data.trials;
 
-    // Pick 2 random trials for warm-up from the full pool
+    // Corrected logic: 2 random trials for warm-up, but keep the full 93 for main
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
-
-    // The main experiment uses the full 93-trial pool
     mainTrials = allTrials;
 
     stage = "test";
@@ -107,7 +103,7 @@ window.start = async function () {
     show("task");
     run();
   } catch (e) {
-    alert("Failed to start session. Please ensure the server is running.");
+    alert("System Error: Failed to initialize session.");
     console.error(e);
   }
 };
@@ -122,12 +118,10 @@ async function run() {
     if (stage === "test") {
       stage = "main";
       i = 0;
-      // Transition to main experiment
-      alert("End of practice. The real experiment will start now.");
+      alert("End of practice. The real experiment starts now.");
       run();
       return;
     }
-    alert("Experiment complete. Thank you!");
     show("view-end");
     return;
   }
@@ -137,38 +131,29 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
-  // Hide UI and empty instructions during playback
+  // 1. UI RESET
   responseBox.classList.add("hidden");
-  instruction.innerHTML = "";
+  instruction.innerHTML = ""; // Clear old card
 
-  // Trial orientation
-  fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Test ${i + 1}`;
+  // 2. ORIENTATION
+  fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // Sequential Playback
+  // 3. PLAYBACK
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 300 + Math.random() * 200));
   await play(trials[i].s2);
 
-  // Show Instructions and Buttons AFTER sounds
-  instruction.innerHTML = `
-        <div style="
-            font-size: 15px;
-            line-height: 1.6;
-            opacity: 0.95;
-            text-align: center;
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 8px;
-            margin-top: 10px;
-        ">
-            <b>Click SAME (or press [S])</b><br><br>
-            <b>OR</b><br><br>
-            <b>Click DIFFERENT (or press [K])</b>
-        </div>
-    `;
+  // 4. RESPONSE WINDOW (Clean DOM Manipulation)
+  const card = document.createElement("div");
+  card.className = "response-card";
+  card.innerHTML = `
+      <p>Were the prosodies of the two sounds same or different?</p>
+      <b>[S] SAME</b> &nbsp; or &nbsp; <b>[K] DIFFERENT</b>
+  `;
+  instruction.appendChild(card);
 
   document.getElementById("b1").innerText = "SAME";
   document.getElementById("b2").innerText = "DIFFERENT";
@@ -209,28 +194,23 @@ window.choose = async function (k) {
   const answer = k === "s" ? "SAME" : "DIFFERENT";
   const correct = answer === trial.ans;
 
-  // Only record results if in 'main' stage (optional)
   if (stage === "main") {
-    try {
-      await fetch("/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          participant_id: pid,
-          pair_id: trial.id,
-          permutation: trial.perm,
-          is_correct: correct,
-          rt_ms: rt,
-        }),
-      });
-    } catch (e) {
-      console.warn("Submit failed:", e);
-    }
+    fetch("/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        participant_id: pid,
+        pair_id: trial.id,
+        permutation: trial.perm,
+        is_correct: correct,
+        rt_ms: rt,
+      }),
+    }).catch(console.warn);
   }
 
   document.getElementById("response").classList.add("hidden");
   i++;
-  setTimeout(run, 400);
+  setTimeout(run, 500); // Slight buffer for visual comfort
 };
 
 /* ---------------------------

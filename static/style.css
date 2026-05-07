@@ -1,0 +1,35 @@
+/* Response Container */
+#instruction {
+    min-height: 120px; /* Prevents layout jumping */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* The Animated Card */
+.response-card {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    animation: reveal 0.4s ease-out forwards;
+}
+
+.response-card p {
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+.response-card b {
+    color: #00d1b2; /* Professional accent color */
+    font-size: 1.1rem;
+}
+
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hidden { display: none !important; }
