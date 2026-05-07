@@ -9,13 +9,8 @@ let canRespond = false;
 let pid;
 let trialStartTime = 0;
 
-/* ---------------------------
-   AUDIO CONTEXT
----------------------------- */
 function audio() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
   return ctx;
 }
 
@@ -24,12 +19,8 @@ async function unlockAudio() {
   if (a.state === "suspended") await a.resume();
 }
 
-/* ---------------------------
-   VIEW SWITCH
----------------------------- */
 function show(id) {
-  const views = ["instr", "form", "hp", "task", "view-end"];
-  views.forEach((x) => {
+  ["instr", "form", "hp", "task", "view-end"].forEach((x) => {
     const el = document.getElementById(x);
     if (el) el.classList.add("hidden");
   });
@@ -37,19 +28,24 @@ function show(id) {
   if (target) target.classList.remove("hidden");
 }
 
+window.goForm = () => show("form");
+window.goHP = () => show("hp");
+
 /* ---------------------------
    START EXPERIMENT
 ---------------------------- */
 window.start = async function () {
   await unlockAudio();
 
+  // CRITICAL: Payload must match your Pydantic Participant model exactly
   const payload = {
     lang: document.getElementById("lang").value,
-    otherlang: document.getElementById("otherlang").value || "None",
+    otherlang: document.getElementById("otherlang")?.value || "None",
     age: document.getElementById("age").value,
     gender: document.getElementById("gender").value,
     exposure: document.getElementById("exposure").value,
     hearing: document.getElementById("hearing").value,
+    music: document.getElementById("music")?.value || "0",
   };
 
   try {
@@ -59,15 +55,18 @@ window.start = async function () {
       body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error("Server Error");
+    if (!res.ok) {
+      const errData = await res.json();
+      console.error("Server Error Detail:", errData);
+      throw new Error("Server rejected the request");
+    }
 
     const data = await res.json();
     pid = data.p_id;
     allTrials = data.trials;
 
-    // Warm-up: 2 random trials from the pool
+    // Warm up with 2 random trials; main experiment remains the full 93
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
-    // Main experiment: Full 93 trials
     mainTrials = allTrials;
 
     stage = "test";
@@ -76,7 +75,7 @@ window.start = async function () {
     show("task");
     run();
   } catch (e) {
-    alert("Initialization failed. Please check server connection.");
+    alert("Failed to start session. Check the console for field errors.");
     console.error(e);
   }
 };
@@ -91,7 +90,7 @@ async function run() {
     if (stage === "test") {
       stage = "main";
       i = 0;
-      alert("Practice complete. The actual experiment starts now.");
+      alert("Practice complete. Starting the real experiment.");
       run();
       return;
     }
@@ -104,29 +103,26 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
-  // Reset UI
   responseBox.classList.add("hidden");
   instruction.innerHTML = "";
 
-  // Orientation
   fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // Playback
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 300 + Math.random() * 200));
   await play(trials[i].s2);
 
-  // Response UI Creation
+  // Color-coded instructional layout as requested
   const card = document.createElement("div");
   card.className = "instruction-card";
   card.innerHTML = `
-    <div class="text-c1">Click SAME or DIFFERENT</div>
-    <div class="text-c2">OR</div>
-    <div class="text-c1-shade">Press S (SAME) or K (DIFFERENT)</div>
-  `;
+        <div class="txt-action">Click SAME or DIFFERENT</div>
+        <div class="txt-or">OR</div>
+        <div class="txt-hint">Press S (SAME) or K (DIFFERENT)</div>
+    `;
   instruction.appendChild(card);
 
   document.getElementById("b1").innerText = "SAME";
@@ -137,14 +133,10 @@ async function run() {
   canRespond = true;
 }
 
-/* ---------------------------
-   AUDIO PLAYBACK
----------------------------- */
 async function play(url) {
   await unlockAudio();
   const r = await fetch(url);
   const b = await ctx.decodeAudioData(await r.arrayBuffer());
-
   return new Promise((res) => {
     const s = ctx.createBufferSource();
     s.buffer = b;
@@ -154,9 +146,6 @@ async function play(url) {
   });
 }
 
-/* ---------------------------
-   RESPONSE HANDLER
----------------------------- */
 window.choose = async function (k) {
   if (!canRespond) return;
   canRespond = false;
@@ -164,7 +153,6 @@ window.choose = async function (k) {
   const trials = stage === "test" ? testTrials : mainTrials;
   const trial = trials[i];
   const rt = Math.round(performance.now() - trialStartTime);
-
   const answer = k === "s" ? "SAME" : "DIFFERENT";
   const correct = answer === trial.ans;
 
@@ -184,12 +172,9 @@ window.choose = async function (k) {
 
   document.getElementById("response").classList.add("hidden");
   i++;
-  setTimeout(run, 500);
+  setTimeout(run, 400);
 };
 
-/* ---------------------------
-   KEYBOARD INPUT
----------------------------- */
 window.addEventListener("keydown", (e) => {
   if (!canRespond) return;
   const key = e.key.toLowerCase();

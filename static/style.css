@@ -1,42 +1,50 @@
 :root {
-  --c1: #00d1b2; /* Main Action Color (Teal) */
-  --c2: #ffdd57; /* The "OR" Separator (Gold) */
-  --c1-shade: #00a892; /* The Keyboard Hint (Darker Teal) */
+  --c1: #00d1b2; /* Main Action Color */
+  --c2: #ffdd57; /* The "OR" Separator */
+  --c1-shade: #008f7a; /* Keyboard Hint (Shade of c1) */
+}
+
+#instruction {
+  min-height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .instruction-card {
   background: #1a1a1a;
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
+  padding: 2rem;
+  border-radius: 12px;
   border: 1px solid #333;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  animation: reveal 0.4s ease-out;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease-out;
 }
 
-.text-c1 {
+.txt-action {
   color: var(--c1);
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  margin-bottom: 8px;
 }
-.text-c2 {
+.txt-or {
   color: var(--c2);
   font-weight: 300;
-  margin: 10px 0;
+  font-size: 1rem;
+  margin: 12px 0;
   display: block;
 }
-.text-c1-shade {
+.txt-hint {
   color: var(--c1-shade);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-style: italic;
 }
 
-@keyframes reveal {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
