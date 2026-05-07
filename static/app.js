@@ -13,21 +13,17 @@ let trialStartTime = 0;
    AUDIO CONTEXT & UNLOCK
 ---------------------------- */
 function audio() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
   return ctx;
 }
 
 async function unlockAudio() {
   const a = audio();
-  if (a.state === "suspended") {
-    await a.resume();
-  }
+  if (a.state === "suspended") await a.resume();
 }
 
 /* ---------------------------
-   MODAL LOGIC (Professional Overlay)
+   MODAL LOGIC
 ---------------------------- */
 let modalResolve;
 
@@ -35,17 +31,31 @@ async function customAlert(title, message) {
   document.getElementById("modal-title").innerText = title;
   document.getElementById("modal-message").innerText = message;
   
-  // Ensure the button is visible for standard alerts
   const modalBtn = document.getElementById("modal-btn");
-  if (modalBtn && title !== "Finished") {
-      modalBtn.classList.remove("hidden");
+  if (modalBtn) {
+      // Hide button only for the final "Finished" message
+      if (title === "Finished") {
+          modalBtn.classList.add("hidden");
+      } else {
+          modalBtn.classList.remove("hidden");
+      }
   }
 
   document.getElementById("modal-overlay").classList.remove("hidden");
+  
   return new Promise((r) => {
     modalResolve = r;
   });
 }
+
+// THIS WAS LIKELY MISSING OR NOT GLOBAL
+window.closeModal = function () {
+  document.getElementById("modal-overlay").classList.add("hidden");
+  if (modalResolve) {
+    modalResolve();
+    modalResolve = null;
+  }
+};
 
 /* ---------------------------
    VIEW SWITCH
@@ -70,7 +80,7 @@ window.testSound = async function () {
   try {
     await unlockAudio();
     const hp = document.getElementById("hpplay");
-    hp.classList.remove("hidden");
+    if (hp) hp.classList.remove("hidden");
 
     const o = ctx.createOscillator();
     const g = ctx.createGain();
@@ -86,7 +96,7 @@ window.testSound = async function () {
     o.stop(ctx.currentTime + 1);
 
     setTimeout(() => {
-      hp.classList.add("hidden");
+      if (hp) hp.classList.add("hidden");
     }, 1000);
   } catch (e) {
     console.error("Audio test failed:", e);
@@ -136,10 +146,7 @@ window.start = async function () {
     show("task");
     run();
   } catch (e) {
-    await customAlert(
-      "Connection Error",
-      "Check your backend or database connectivity.",
-    );
+    await customAlert("Connection Error", "Check your backend or database connectivity.");
     console.error(e);
   }
 };
@@ -154,26 +161,15 @@ async function run() {
     if (stage === "test") {
       stage = "main";
       i = 0;
-      await customAlert(
-        "Practice Complete",
-        "Warm-up finished. The real experiment starts now.",
-      );
+      // This 'await' pauses execution until you click "Continue"
+      await customAlert("Practice Complete", "Warm-up finished. The real experiment starts now.");
       run();
       return;
     }
 
-    // --- UPDATED FINISHED LOGIC ---
-    const modalBtn = document.getElementById("modal-btn");
-    if (modalBtn) modalBtn.classList.add("hidden"); // Hide the button
-
-    await customAlert(
-      "Finished",
-      "The experiment is now complete. Thank you!"
-    );
-    
+    await customAlert("Finished", "The experiment is now complete. Thank you!");
     show("view-end");
     return;
-    // ------------------------------
   }
 
   canRespond = false;
@@ -181,13 +177,15 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
-  responseBox.classList.add("hidden");
-  instruction.innerHTML = "";
+  if (responseBox) responseBox.classList.add("hidden");
+  if (instruction) instruction.innerHTML = "";
 
   // 1. Orientation
-  fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
-  await new Promise((r) => setTimeout(r, 800));
-  fixArea.innerText = "";
+  if (fixArea) {
+      fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
+      await new Promise((r) => setTimeout(r, 800));
+      fixArea.innerText = "";
+  }
   await new Promise((r) => setTimeout(r, 500));
 
   // 2. Audio Phase
@@ -195,21 +193,24 @@ async function run() {
   await new Promise((r) => setTimeout(r, 400));
   await play(trials[i].s2);
 
-  // 3. Response Phase - Conditional Instructions
-  if (stage === "test") {
-    instruction.innerHTML = `
-        <div class="practice-instructions">
-            <p>If you heard the <b>same</b> sound twice, click the button <b>SAME</b> or press the key <span class="kbd-key-inline">S</span></p>
-            <p>If the sounds were <b>different</b>, click the button <b>DIFFERENT</b> or press the key <span class="kbd-key-inline">K</span></p>
-        </div>
-      `;
-  } else {
-    instruction.innerHTML = "";
+  // 3. Response Phase
+  if (instruction) {
+    if (stage === "test") {
+      instruction.innerHTML = `
+          <div class="practice-instructions">
+              <p>If you heard the <b>same</b> sound twice, click the button <b>SAME</b> or press the key <span class="kbd-key-inline">S</span></p>
+              <p>If the sounds were <b>different</b>, click the button <b>DIFFERENT</b> or press the key <span class="kbd-key-inline">K</span></p>
+          </div>
+        `;
+    } else {
+      instruction.innerHTML = "";
+    }
   }
 
   // 4. Input Mapping
   const setupInputGroup = (btnId, keyChar) => {
     const btn = document.getElementById(btnId);
+    if (!btn) return;
     const container = btn.parentElement;
 
     const oldHint = container.querySelector(".input-hint");
@@ -224,10 +225,12 @@ async function run() {
   setupInputGroup("b1", "S");
   setupInputGroup("b2", "K");
 
-  document.getElementById("b1").innerText = "SAME";
-  document.getElementById("b2").innerText = "DIFFERENT";
+  const b1 = document.getElementById("b1");
+  const b2 = document.getElementById("b2");
+  if (b1) b1.innerText = "SAME";
+  if (b2) b2.innerText = "DIFFERENT";
 
-  responseBox.classList.remove("hidden");
+  if (responseBox) responseBox.classList.remove("hidden");
   trialStartTime = performance.now();
   canRespond = true;
 }
@@ -278,7 +281,8 @@ window.choose = async function (k) {
     }).catch((err) => console.warn("Submit failed:", err));
   }
 
-  document.getElementById("response").classList.add("hidden");
+  const responseBox = document.getElementById("response");
+  if (responseBox) responseBox.classList.add("hidden");
   i++;
   setTimeout(run, 500);
 };
