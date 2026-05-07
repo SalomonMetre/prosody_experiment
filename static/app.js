@@ -27,7 +27,7 @@ async function unlockAudio() {
 }
 
 /* ---------------------------
-   MODAL LOGIC (Subpar Alert Replacement)
+   MODAL LOGIC
 ---------------------------- */
 let modalResolve;
 
@@ -63,7 +63,7 @@ window.goForm = () => show("form");
 window.goHP = () => show("hp");
 
 /* ---------------------------
-   TEST SOUND (STABILIZED)
+   TEST SOUND
 ---------------------------- */
 window.testSound = async function () {
   try {
@@ -121,7 +121,6 @@ window.start = async function () {
     pid = data.p_id;
     allTrials = data.trials;
 
-    // 2 random trials for warm-up, pool intact for main
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
     mainTrials = allTrials;
 
@@ -133,7 +132,7 @@ window.start = async function () {
   } catch (e) {
     await customAlert(
       "Connection Error",
-      "The server did not respond. Check your database permissions or network.",
+      "Database check failed. Please ensure the backend is active.",
     );
     console.error(e);
   }
@@ -151,15 +150,12 @@ async function run() {
       i = 0;
       await customAlert(
         "Practice Complete",
-        "You have finished the warm-up. The real experiment starts now.",
+        "Warm-up finished. The real experiment starts now.",
       );
       run();
       return;
     }
-    await customAlert(
-      "Finished",
-      "The experiment is now complete. Thank you for your participation.",
-    );
+    await customAlert("Finished", "The experiment is complete. Thank you!");
     show("view-end");
     return;
   }
@@ -172,33 +168,45 @@ async function run() {
   responseBox.classList.add("hidden");
   instruction.innerHTML = "";
 
-  // 1. Orientation Phase
+  // 1. Orientation
   fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // 2. Audio Phase
+  // 2. Audio
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 400));
   await play(trials[i].s2);
 
-  // 3. Response Phase - Teal & Gold Aesthetic Logic
-  const card = document.createElement("div");
-  card.className = "instruction-card";
+  // 3. Response Phase - Split Visual Mapping
+  const container = document.createElement("div");
+  container.className = "instruction-container";
 
-  card.innerHTML = `
-        <div style="margin-bottom: 5px;">
-            <span>Click </span><span class="c1">SAME</span><span> or </span><span class="c1">DIFFERENT</span>
-        </div>
-        <div class="c2" style="margin: 8px 0;">OR</div>
-        <div>
-            <span>Press </span><span class="c1-s">S</span><span> (SAME) or </span><span class="c1-s">K</span><span> (DIFFERENT)</span>
+  function createGroup(sideTitle, btnText, keyChar) {
+    return `
+        <div class="instr-group">
+            <div class="group-title">${sideTitle}</div>
+            <div class="action-row">
+                <span class="label-small">Click</span>
+                <div class="flat-btn-sym">${btnText}</div>
+            </div>
+            <div class="instr-or">OR</div>
+            <div class="action-row">
+                <span class="label-small">Press</span>
+                <div class="vol-key-sym">${keyChar}</div>
+            </div>
         </div>
     `;
+  }
 
-  instruction.appendChild(card);
+  container.innerHTML =
+    createGroup("SAME", "SAME", "S") +
+    createGroup("DIFFERENT", "DIFFERENT", "K");
 
+  instruction.appendChild(container);
+
+  // Buttons are populated but hidden until this point
   document.getElementById("b1").innerText = "SAME";
   document.getElementById("b2").innerText = "DIFFERENT";
 
@@ -250,7 +258,7 @@ window.choose = async function (k) {
         is_correct: correct,
         rt_ms: rt,
       }),
-    }).catch((err) => console.warn("Submission error:", err));
+    }).catch((err) => console.warn("Submit failed:", err));
   }
 
   document.getElementById("response").classList.add("hidden");
