@@ -1,32 +1,22 @@
 :root {
-  --c1: #00d1b2; /* Action color */
-  --c2: #ffdd57; /* "OR" color */
-  --c1-shade: #008f7a; /* Key hint color */
+    --teal-main: #008080;   /* Classic Teal for SAME/DIFFERENT */
+    --gold-or: #ffdd57;     /* High contrast Gold for "OR" */
+    --teal-shade: #005f5f;  /* Deeper Teal for S/K hints */
 }
 
 .instruction-card {
-  background: #1a1a1a;
-  padding: 2.5rem;
-  border-radius: 15px;
-  border: 1px solid #333;
-  text-align: center;
-  line-height: 1.8;
+    background: #1a1a1a;
+    padding: 2.5rem;
+    border-radius: 15px;
+    border: 1px solid #333;
+    text-align: center;
+    line-height: 2;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 
-.c1 {
-  color: var(--c1);
-  font-weight: bold;
-}
-.c2 {
-  color: var(--c2);
-  font-weight: bold;
-}
-.c1-s {
-  color: var(--c1-shade);
-  font-weight: bold;
-}
+.c1 { color: var(--teal-main); font-weight: bold; }
+.c2 { color: var(--gold-or); font-weight: bold; }
+.c1-s { color: var(--teal-shade); font-weight: bold; }
 
-/* General text within the card */
-.instruction-card span {
-  color: #eee;
-}
+/* Neutral text for "Click", "or", "Press" */
+.instruction-card span { color: #d1d1d1; font-size: 1.1rem; }
