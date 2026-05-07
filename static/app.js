@@ -34,20 +34,18 @@ let modalResolve;
 async function customAlert(title, message) {
   document.getElementById("modal-title").innerText = title;
   document.getElementById("modal-message").innerText = message;
-  document.getElementById("modal-overlay").classList.remove("hidden");
+  
+  // Ensure the button is visible for standard alerts
+  const modalBtn = document.getElementById("modal-btn");
+  if (modalBtn && title !== "Finished") {
+      modalBtn.classList.remove("hidden");
+  }
 
-  return new Promise((resolve) => {
-    modalResolve = resolve;
+  document.getElementById("modal-overlay").classList.remove("hidden");
+  return new Promise((r) => {
+    modalResolve = r;
   });
 }
-
-window.closeModal = function () {
-  document.getElementById("modal-overlay").classList.add("hidden");
-  if (modalResolve) {
-    modalResolve();
-    modalResolve = null;
-  }
-};
 
 /* ---------------------------
    VIEW SWITCH
@@ -163,9 +161,19 @@ async function run() {
       run();
       return;
     }
-    await customAlert("Finished", "The experiment is now complete. Thank you!");
+
+    // --- UPDATED FINISHED LOGIC ---
+    const modalBtn = document.getElementById("modal-btn");
+    if (modalBtn) modalBtn.classList.add("hidden"); // Hide the button
+
+    await customAlert(
+      "Finished",
+      "The experiment is now complete. Thank you!"
+    );
+    
     show("view-end");
     return;
+    // ------------------------------
   }
 
   canRespond = false;
