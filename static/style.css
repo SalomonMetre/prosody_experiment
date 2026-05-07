@@ -1,50 +1,32 @@
 :root {
-  --c1: #00d1b2; /* Main Action Color */
-  --c2: #ffdd57; /* The "OR" Separator */
-  --c1-shade: #008f7a; /* Keyboard Hint (Shade of c1) */
-}
-
-#instruction {
-  min-height: 150px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  --c1: #00d1b2; /* Action color */
+  --c2: #ffdd57; /* "OR" color */
+  --c1-shade: #008f7a; /* Key hint color */
 }
 
 .instruction-card {
   background: #1a1a1a;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 2.5rem;
+  border-radius: 15px;
   border: 1px solid #333;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.3s ease-out;
+  line-height: 1.8;
 }
 
-.txt-action {
+.c1 {
   color: var(--c1);
   font-weight: bold;
-  font-size: 1.3rem;
-  margin-bottom: 8px;
 }
-.txt-or {
+.c2 {
   color: var(--c2);
-  font-weight: 300;
-  font-size: 1rem;
-  margin: 12px 0;
-  display: block;
+  font-weight: bold;
 }
-.txt-hint {
+.c1-s {
   color: var(--c1-shade);
-  font-size: 1rem;
-  font-style: italic;
+  font-weight: bold;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* General text within the card */
+.instruction-card span {
+  color: #eee;
 }

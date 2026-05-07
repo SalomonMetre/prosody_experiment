@@ -1,219 +1,225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Prosody Study</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prosody Study</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="style.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
 
-<style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:Inter;
-    background:#000;
-    color:#fff;
-}
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Inter;
+        background: #000;
+        color: #fff;
+      }
 
-#container{
-    width:560px;
-    background:#111;
-    border:1px solid #333;
-    padding:40px;
-    border-radius:16px;
-}
+      #container {
+        width: 560px;
+        background: #111;
+        border: 1px solid #333;
+        padding: 40px;
+        border-radius: 16px;
+      }
 
-.hidden{display:none!important;}
+      .hidden {
+        display: none !important;
+      }
 
-.btn{
-    width:100%;
-    padding:14px;
-    margin-top:10px;
-    background:#000;
-    color:#fff;
-    border:1px solid #fff;
-    cursor:pointer;
-}
+      .btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        background: #000;
+        color: #fff;
+        border: 1px solid #fff;
+        cursor: pointer;
+      }
 
-.btn:hover{
-    background:#fff;
-    color:#000;
-}
+      .btn:hover {
+        background: #fff;
+        color: #000;
+      }
 
-label{
-    display:block;
-    margin-top:12px;
-    font-size:14px;
-    opacity:0.9;
-}
+      label {
+        display: block;
+        margin-top: 12px;
+        font-size: 14px;
+        opacity: 0.9;
+      }
 
-.required::after{
-    content:" *";
-    color:#ff5555;
-}
+      .required::after {
+        content: " *";
+        color: #ff5555;
+      }
 
-input, select{
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    margin-bottom:10px;
-    background:#000;
-    color:#fff;
-    border:1px solid #444;
-}
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        background: #000;
+        color: #fff;
+        border: 1px solid #444;
+      }
 
-.choice{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
-}
+      .choice {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
 
-.choice button{
-    flex:1;
-    padding:18px;
-    border:1px solid #fff;
-    background:#000;
-    color:#fff;
-    cursor:pointer;
-}
+      .choice button {
+        flex: 1;
+        padding: 18px;
+        border: 1px solid #fff;
+        background: #000;
+        color: #fff;
+        cursor: pointer;
+      }
 
-.choice button:hover{
-    background:#fff;
-    color:#000;
-}
+      .choice button:hover {
+        background: #fff;
+        color: #000;
+      }
 
-#fix{
-    font-size:42px;
-    text-align:center;
-    margin:40px 0;
-}
+      #fix {
+        font-size: 42px;
+        text-align: center;
+        margin: 40px 0;
+      }
 
-#instruction{
-    text-align:center;
-    margin-bottom:20px;
-    font-size:14px;
-    opacity:0.9;
-}
-</style>
-</head>
+      #instruction {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <div id="container">
+      <!-- INSTRUCTIONS -->
+      <div id="instr">
+        <h2>Instructions</h2>
 
-<div id="container">
+        <p>
+          Welcome! And thanks a million for your time ! <br />
+          <br />
 
-<!-- INSTRUCTIONS -->
-<div id="instr">
-    <h2>Instructions</h2>
+          You will take part in a perception experiment on Amharic speech
+          sounds. <br />
+          <br />
+          The experiment will proceed as follows:
+        </p>
 
-    <p>
-        Welcome! And thanks a million for your time ! <br> <br>
-        
-        You will take part in a perception experiment on Amharic speech sounds. <br> <br>
-        The experiment will proceed as follows:
-    </p>
+        <ol style="text-align: left">
+          <li>Fill in background information</li>
+          <li>Headphone check</li>
+          <li>Pre-experiment warm-up</li>
+          <li>Main experiment: sound discrimination task</li>
+        </ol>
 
-    <ol style="text-align:left">
-        <li>Fill in background information</li>
-        <li>Headphone check</li>
-        <li>Pre-experiment warm-up</li>
-        <li>Main experiment: sound discrimination task</li>
-    </ol>
+        <button class="btn" onclick="goForm()">Continue</button>
+      </div>
 
-    <button class="btn" onclick="goForm()">Continue</button>
-</div>
+      <!-- FORM -->
+      <div id="form" class="hidden">
+        <h2>Anonymous Profile</h2>
 
-<!-- FORM -->
-<div id="form" class="hidden">
+        <label class="required">First Language</label>
+        <select id="lang">
+          <option>French</option>
+          <option>English</option>
+          <option>Swahili</option>
+          <option>Amharic</option>
+          <option>Arabic</option>
+          <option>Italian</option>
+          <option>Portuguese</option>
+          <option>Spanish</option>
+          <option>Other</option>
+        </select>
 
-    <h2>Anonymous Profile</h2>
+        <label>Other Languages (optional)</label>
+        <input id="otherlang" placeholder="None" />
 
-    <label class="required">First Language</label>
-    <select id="lang">
-        <option>French</option>
-        <option>English</option>
-        <option>Swahili</option>
-        <option>Amharic</option>
-        <option>Arabic</option>
-        <option>Italian</option>
-        <option>Portuguese</option>
-        <option>Spanish</option>
-        <option>Other</option>
-    </select>
+        <label class="required">Age Group</label>
+        <select id="age">
+          <option>18–25</option>
+          <option>26–35</option>
+          <option>36–45</option>
+          <option>46–60</option>
+          <option>60+</option>
+        </select>
 
-    <label>Other Languages (optional)</label>
-    <input id="otherlang" placeholder="None"/>
+        <label class="required">Gender</label>
+        <select id="gender">
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
 
-    <label class="required">Age Group</label>
-    <select id="age">
-        <option>18–25</option>
-        <option>26–35</option>
-        <option>36–45</option>
-        <option>46–60</option>
-        <option>60+</option>
-    </select>
+        <label class="required">Exposure to Amharic</label>
+        <select id="exposure">
+          <option>None</option>
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
 
-    <label class="required">Gender</label>
-    <select id="gender">
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-    </select>
+        <label class="required">Hearing</label>
+        <select id="hearing">
+          <option>Normal</option>
+          <option>Impaired</option>
+        </select>
 
-    <label class="required">Exposure to Amharic</label>
-    <select id="exposure">
-        <option>None</option>
-        <option>Low</option>
-        <option>Medium</option>
-        <option>High</option>
-    </select>
+        <button class="btn" onclick="goHP()">Continue</button>
+      </div>
 
-    <label class="required">Hearing</label>
-    <select id="hearing">
-        <option>Normal</option>
-        <option>Impaired</option>
-    </select>
+      <!-- HEADPHONE -->
+      <div id="hp" class="hidden">
+        <h2>Headphone Check</h2>
 
-    <button class="btn" onclick="goHP()">Continue</button>
-</div>
+        <button class="btn" onclick="testSound()">Play Test Sound</button>
 
-<!-- HEADPHONE -->
-<div id="hp" class="hidden">
+        <div
+          id="hpplay"
+          class="hidden"
+          style="text-align: center; margin-top: 20px"
+        >
+          <div style="font-size: 40px">♪</div>
+          Playing...
+        </div>
 
-    <h2>Headphone Check</h2>
+        <button class="btn" onclick="start()">Start Experiment</button>
+      </div>
 
-    <button class="btn" onclick="testSound()">Play Test Sound</button>
+      <!-- TASK -->
+      <div id="task" class="hidden">
+        <div id="fix"></div>
 
-    <div id="hpplay" class="hidden" style="text-align:center;margin-top:20px">
-        <div style="font-size:40px">♪</div>
-        Playing...
-    </div>
+        <div id="instruction"></div>
 
-    <button class="btn" onclick="start()">Start Experiment</button>
-</div>
-
-<!-- TASK -->
-<div id="task" class="hidden">
-
-    <div id="fix"></div>
-
-    <div id="instruction"></div>
-
-    <div id="response" class="hidden">
-        <div class="choice">
+        <div id="response" class="hidden">
+          <div class="choice">
             <button id="b1" onclick="choose('s')"></button>
             <button id="b2" onclick="choose('k')"></button>
+          </div>
         </div>
+      </div>
     </div>
 
-</div>
-
-</div>
-
-<script src="./app.js"></script>
-</body>
+    <script src="./app.js"></script>
+  </body>
 </html>
