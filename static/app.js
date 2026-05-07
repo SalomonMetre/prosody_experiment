@@ -9,35 +9,26 @@ let canRespond = false;
 let pid;
 let trialStartTime = 0;
 
-/* ---------------------------
-   AUDIO CONTEXT & UNLOCK
----------------------------- */
 function audio() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
   return ctx;
 }
 
 async function unlockAudio() {
   const a = audio();
-  if (a.state === "suspended") {
-    await a.resume();
-  }
+  if (a.state === "suspended") await a.resume();
 }
 
 /* ---------------------------
-   MODAL LOGIC (Professional Overlay)
+   MODAL LOGIC
 ---------------------------- */
 let modalResolve;
-
 async function customAlert(title, message) {
   document.getElementById("modal-title").innerText = title;
   document.getElementById("modal-message").innerText = message;
   document.getElementById("modal-overlay").classList.remove("hidden");
-
-  return new Promise((resolve) => {
-    modalResolve = resolve;
+  return new Promise((r) => {
+    modalResolve = r;
   });
 }
 
@@ -46,21 +37,14 @@ window.closeModal = function () {
   if (modalResolve) modalResolve();
 };
 
-/* ---------------------------
-   VIEW SWITCH
----------------------------- */
 function show(id) {
-  const views = ["instr", "form", "hp", "task", "view-end"];
-  views.forEach((x) => {
+  ["instr", "form", "hp", "task", "view-end"].forEach((x) => {
     const el = document.getElementById(x);
     if (el) el.classList.add("hidden");
   });
   const target = document.getElementById(id);
   if (target) target.classList.remove("hidden");
 }
-
-window.goForm = () => show("form");
-window.goHP = () => show("hp");
 
 /* ---------------------------
    TEST SOUND
@@ -70,25 +54,20 @@ window.testSound = async function () {
     await unlockAudio();
     const hp = document.getElementById("hpplay");
     hp.classList.remove("hidden");
-
     const o = ctx.createOscillator();
     const g = ctx.createGain();
-
     o.type = "sine";
     o.frequency.setValueAtTime(440, ctx.currentTime);
     g.gain.setValueAtTime(0.08, ctx.currentTime);
-
     o.connect(g);
     g.connect(ctx.destination);
-
     o.start();
     o.stop(ctx.currentTime + 1);
-
     setTimeout(() => {
       hp.classList.add("hidden");
     }, 1000);
   } catch (e) {
-    console.error("Audio test failed:", e);
+    console.error(e);
   }
 };
 
@@ -97,7 +76,6 @@ window.testSound = async function () {
 ---------------------------- */
 window.start = async function () {
   await unlockAudio();
-
   const payload = {
     lang: document.getElementById("lang").value,
     otherlang: document.getElementById("otherlang")?.value || "None",
@@ -114,28 +92,18 @@ window.start = async function () {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-
-    if (!res.ok) throw new Error("Server rejected request");
-
+    if (!res.ok) throw new Error();
     const data = await res.json();
     pid = data.p_id;
     allTrials = data.trials;
-
-    // Warm-up logic: 2 random trials, full pool for main experiment
     testTrials = [...allTrials].sort(() => 0.5 - Math.random()).slice(0, 2);
     mainTrials = allTrials;
-
     stage = "test";
     i = 0;
-
     show("task");
     run();
   } catch (e) {
-    await customAlert(
-      "Connection Error",
-      "The database is unreachable. Please restart the service on the server.",
-    );
-    console.error(e);
+    await customAlert("Error", "Server connection failed.");
   }
 };
 
@@ -151,12 +119,12 @@ async function run() {
       i = 0;
       await customAlert(
         "Practice Complete",
-        "You have finished the warm-up. The actual experiment begins now.",
+        "Starting the real experiment now.",
       );
       run();
       return;
     }
-    await customAlert("Finished", "The experiment is now complete. Thank you!");
+    await customAlert("Finished", "The experiment is complete.");
     show("view-end");
     return;
   }
@@ -166,36 +134,32 @@ async function run() {
   const instruction = document.getElementById("instruction");
   const fixArea = document.getElementById("fix");
 
-  // Reset UI per trial
   responseBox.classList.add("hidden");
-  instruction.innerHTML = "";
+  instruction.innerHTML = ""; // No more "Please respond" text
 
-  // 1. Orientation Phase
+  // 1. Orientation
   fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
   await new Promise((r) => setTimeout(r, 800));
   fixArea.innerText = "";
   await new Promise((r) => setTimeout(r, 500));
 
-  // 2. Audio Phase
+  // 2. Audio
   await play(trials[i].s1);
   await new Promise((r) => setTimeout(r, 400));
   await play(trials[i].s2);
 
-  // 3. Response Phase (Grouped Buttons + Key Hints)
-  instruction.innerHTML = `<div style="color:#888; font-size:0.95rem; margin-bottom:15px;">Please respond:</div>`;
-
-  // Helper to inject keyboard hints under the buttons
+  // 3. Response Phase - Clean Grouped Inputs
   const setupInputGroup = (btnId, keyChar) => {
     const btn = document.getElementById(btnId);
     const container = btn.parentElement;
 
-    // Remove old hints to prevent stacking
+    // Remove old hints
     const oldHint = container.querySelector(".input-hint");
     if (oldHint) oldHint.remove();
 
     const hint = document.createElement("div");
     hint.className = "input-hint";
-    hint.innerHTML = `<span class="or-text">OR</span> <span>press <span class="kbd-key">${keyChar}</span></span>`;
+    hint.innerHTML = `<span class="or-text">OR</span><span class="kbd-key">${keyChar}</span>`;
     container.appendChild(hint);
   };
 
@@ -210,15 +174,11 @@ async function run() {
   canRespond = true;
 }
 
-/* ---------------------------
-   AUDIO PLAYBACK
----------------------------- */
 async function play(url) {
   await unlockAudio();
   const r = await fetch(url);
   const buf = await r.arrayBuffer();
   const b = await ctx.decodeAudioData(buf);
-
   return new Promise((res) => {
     const s = ctx.createBufferSource();
     s.buffer = b;
@@ -228,9 +188,6 @@ async function play(url) {
   });
 }
 
-/* ---------------------------
-   RESPONSE HANDLER
----------------------------- */
 window.choose = async function (k) {
   if (!canRespond) return;
   canRespond = false;
@@ -238,7 +195,6 @@ window.choose = async function (k) {
   const trials = stage === "test" ? testTrials : mainTrials;
   const trial = trials[i];
   const rt = Math.round(performance.now() - trialStartTime);
-
   const answer = k === "s" ? "SAME" : "DIFFERENT";
   const correct = answer === trial.ans;
 
@@ -253,7 +209,7 @@ window.choose = async function (k) {
         is_correct: correct,
         rt_ms: rt,
       }),
-    }).catch((err) => console.warn("Submit failed:", err));
+    }).catch(console.warn);
   }
 
   document.getElementById("response").classList.add("hidden");
@@ -261,9 +217,6 @@ window.choose = async function (k) {
   setTimeout(run, 500);
 };
 
-/* ---------------------------
-   KEYBOARD INPUT
----------------------------- */
 window.addEventListener("keydown", (e) => {
   if (!canRespond) return;
   const key = e.key.toLowerCase();
