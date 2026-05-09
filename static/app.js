@@ -182,7 +182,7 @@ async function run() {
 
   // 1. Orientation
   if (fixArea) {
-      fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1}`;
+      fixArea.innerText = stage === "test" ? `Practice ${i + 1}` : `Trial ${i + 1} / 93`;
       await new Promise((r) => setTimeout(r, 800));
       fixArea.innerText = "";
   }
